@@ -1,0 +1,24 @@
+
+spring:
+  #数据源配置
+  datasource:
+    dynamic:
+      primary: order
+      datasource:
+        order:
+          url: jdbc:mysql://localhost:3306/demo-order
+          username: root
+          password: root
+          driverClassName: com.mysql.jdbc.Driver
+          type: com.alibaba.druid.pool.DruidDataSource
+        stock:
+          url: jdbc:mysql://localhost:3306/demo-stock
+          username: root
+          password: root
+          driverClassName: com.mysql.jdbc.Driver
+          type: com.alibaba.druid.pool.DruidDataSource
+logging:
+  level:
+    com.company.project.biz.mapper: debug
+server:
+  port: 8081
