@@ -9,10 +9,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @MapperScan("com.shenlinqiang.demo.transaction.mapper")
 public class MainApplication {
     public static void main(String[] args) {
-        String property = System.getProperty("env", "order");
-        if("order".equals(property)){
-
-        }
         SpringApplication.run(MainApplication.class, args);
     }
 }

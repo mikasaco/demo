@@ -1,13 +1,8 @@
 package com.shenlinqiang.demo.transaction.mq;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.baomidou.dynamic.datasource.annotation.DS;
 import com.shenlinqiang.demo.transaction.entity.DemoStock;
-import com.shenlinqiang.demo.transaction.entity.DemoTransaction;
-import com.shenlinqiang.demo.transaction.mapper.DemoStockMapper;
 import com.shenlinqiang.demo.transaction.service.DemoStockService;
-import com.shenlinqiang.demo.transaction.service.DemoTransactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
@@ -28,9 +23,6 @@ public class Consumer implements InitializingBean {
     @Autowired
     private DemoStockService stockService;
 
-    @Autowired
-    private DemoTransactionService transactionService;
-
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -49,15 +41,7 @@ public class Consumer implements InitializingBean {
                 for (MessageExt msg : msgs) {
                     try {
                         log.info("收到消息," + new String(msg.getBody()));
-
-                        if (!msgValite(msg)) {
-                            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
-                        }
                         DemoStock stock = JSON.parseObject(msg.getBody(), DemoStock.class);
-                        DemoTransaction transaction = new DemoTransaction();
-                        transaction.setTransactionId(msg.getTransactionId());
-                        transaction.setContent(new String(msg.getBody()));
-                        transactionService.insert(transaction);
                         DemoStock demoStock = stockService.SelectById(stock.getId());
                         if (demoStock == null) {
                             log.error("库存id不存在，传入的id为", stock.getId());
@@ -81,22 +65,4 @@ public class Consumer implements InitializingBean {
 
     }
 
-    private boolean msgValite(MessageExt msg) {
-        DemoTransaction transaction = transactionService.selectByTransactionId(msg.getMsgId());
-        if (transaction == null) {
-            return true;
-        }
-        if (1 == transaction.getStatus()) {
-            log.info(msg.getMsgId() + " ,消息已经处理过了");
-            return false;
-        }
-        if (transaction.getConsumeTime() >= 3) {
-            log.info(msg.getMsgId() + " ,消息处理多次未成功，进行补偿");
-            return true;
-        }
-        transaction.setConsumeTime(transaction.getConsumeTime() + 1);
-        transactionService.update(transaction);
-        return true;
-
-    }
 }
