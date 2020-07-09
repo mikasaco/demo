@@ -6,6 +6,8 @@
     <modules>
         <module>tcc</module>
         <module>transaction</module>
+        <module>algorithm</module>
+        <module>multithread</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
